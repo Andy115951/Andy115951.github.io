@@ -1,0 +1,571 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>简历 on Hugo 主题 Stack</title><link>https://andy115951.github.io/categories/%E7%AE%80%E5%8E%86/</link><description>Recent content in 简历 on Hugo 主题 Stack</description><generator>Hugo -- gohugo.io</generator><language>zh</language><lastBuildDate>Mon, 13 Jan 2025 00:00:00 +0800</lastBuildDate><atom:link href="https://andy115951.github.io/categories/%E7%AE%80%E5%8E%86/index.xml" rel="self" type="application/rss+xml"/><item><title>Chatbox AI 自动化测试项目详解</title><link>https://andy115951.github.io/chatbox-ai-%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95%E9%A1%B9%E7%9B%AE%E8%AF%A6%E8%A7%A3/</link><pubDate>Mon, 13 Jan 2025 00:00:00 +0800</pubDate><guid>https://andy115951.github.io/chatbox-ai-%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95%E9%A1%B9%E7%9B%AE%E8%AF%A6%E8%A7%A3/</guid><description>&lt;h2 id="项目概述"&gt;项目概述
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;项目名称：&lt;/strong&gt; Chatbox AI 跨平台自动化测试框架
+&lt;strong&gt;项目时间：&lt;/strong&gt; 2024.XX - 至今
+&lt;strong&gt;担任角色：&lt;/strong&gt; 测试工程师 / 自动化测试负责人
+&lt;strong&gt;项目规模：&lt;/strong&gt; 桌面端 + 移动端，测试用例 XX 条，代码约 XX 行&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id="项目背景"&gt;项目背景
+&lt;/h2&gt;&lt;p&gt;Chatbox AI 是一款智能对话助手应用，支持 &lt;strong&gt;Electron 桌面端&lt;/strong&gt;（Windows/macOS）和 &lt;strong&gt;移动端&lt;/strong&gt;（iOS/Android）。随着功能迭代加速，手工回归测试成本越来越高，主要痛点：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;回归耗时长&lt;/strong&gt;：全量手工回归需要 2-3 天&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;多平台差异&lt;/strong&gt;：不同平台 UI 实现不同，重复测试工作量大&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;遗漏风险高&lt;/strong&gt;：手工测试容易漏测边缘场景&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;崩溃难定位&lt;/strong&gt;：偶发性崩溃难以复现和定位&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id="技术栈"&gt;技术栈
+&lt;/h2&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;类型&lt;/th&gt;
+&lt;th&gt;技术选型&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;测试框架&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Playwright + TypeScript&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;移动端&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Appium + WebdriverIO&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;辅助工具&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Python + PyAutoGUI + Tesseract OCR&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;版本控制&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Git + GitHub&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;CI/CD&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;GitHub Actions / Jenkins（待补充）&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr&gt;
+&lt;h2 id="项目架构"&gt;项目架构
+&lt;/h2&gt;&lt;h3 id="设计模式"&gt;设计模式
+&lt;/h3&gt;&lt;p&gt;采用 &lt;strong&gt;POM（Page Object Model）&lt;/strong&gt; 设计模式，实现分层架构：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-gdscript3" data-lang="gdscript3"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;framework&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;├──&lt;/span&gt; &lt;span class="n"&gt;base&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ts&lt;/span&gt; &lt;span class="c1"&gt;# 基础应用类（启动、关闭、崩溃检测）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;├──&lt;/span&gt; &lt;span class="n"&gt;chatbox&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;actions&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ts&lt;/span&gt; &lt;span class="c1"&gt;# 核心业务操作（发消息、模型切换）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;├──&lt;/span&gt; &lt;span class="n"&gt;chatbox&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;settings&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ts&lt;/span&gt; &lt;span class="c1"&gt;# 设置页面操作封装&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;├──&lt;/span&gt; &lt;span class="n"&gt;mobile&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;actions&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ts&lt;/span&gt; &lt;span class="c1"&gt;# 移动端操作封装&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;├──&lt;/span&gt; &lt;span class="n"&gt;test&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;helper&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ts&lt;/span&gt; &lt;span class="c1"&gt;# 测试辅助工具（等待、截图）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="err"&gt;└──&lt;/span&gt; &lt;span class="n"&gt;constants&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ts&lt;/span&gt; &lt;span class="c1"&gt;# 常量定义&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="核心模块"&gt;核心模块
+&lt;/h3&gt;&lt;h4 id="1-基础应用管理basets"&gt;1. 基础应用管理（base.ts）
+&lt;/h4&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-typescript" data-lang="typescript"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;// 核心能力
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="err"&gt;应用启动&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="err"&gt;关闭管理&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="err"&gt;进程状态监控&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="err"&gt;崩溃检测与恢复&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="err"&gt;版本号获取与验证&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h4 id="2-业务操作封装chatbox-actionsts"&gt;2. 业务操作封装（chatbox-actions.ts）
+&lt;/h4&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-typescript" data-lang="typescript"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;// 核心能力
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="err"&gt;发送&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="err"&gt;接收消息&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="err"&gt;模型选择器操作&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="err"&gt;所有模型遍历测试&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="err"&gt;会话管理&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h4 id="3-移动端支持mobile-actionsts"&gt;3. 移动端支持（mobile-actions.ts）
+&lt;/h4&gt;&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-typescript" data-lang="typescript"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;// 核心能力
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="nx"&gt;Android&lt;/span&gt; &lt;span class="err"&gt;设备连接&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="err"&gt;元素定位与操作&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="err"&gt;截图与状态检查&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;hr&gt;
+&lt;h2 id="核心功能实现"&gt;核心功能实现
+&lt;/h2&gt;&lt;h3 id="1-跨平台统一测试框架"&gt;1. 跨平台统一测试框架
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;问题：&lt;/strong&gt; 桌面端和移动端使用不同的自动化工具，如何统一管理？&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;解决方案：&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;桌面端：使用 Playwright 的 Electron 模式，直接通过 &lt;code&gt;_electron&lt;/code&gt; 启动&lt;/li&gt;
+&lt;li&gt;移动端：使用 Appium 连接 Android 设备&lt;/li&gt;
+&lt;li&gt;通过 &lt;strong&gt;接口抽象&lt;/strong&gt; 实现测试用例的统一编写&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;span class="lnt"&gt;8
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-typescript" data-lang="typescript"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;// 接口抽象示例
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kr"&gt;interface&lt;/span&gt; &lt;span class="nx"&gt;IChatboxActions&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nx"&gt;sendMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;message&lt;/span&gt;: &lt;span class="kt"&gt;string&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;Promise&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="nx"&gt;isTimeout&lt;/span&gt;: &lt;span class="kt"&gt;boolean&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nx"&gt;openModelSelector&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;Promise&lt;/span&gt;&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;void&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nx"&gt;getAllModels&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;Promise&lt;/span&gt;&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;string&lt;/span&gt;&lt;span class="err"&gt;[]&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;// 桌面端和移动端分别实现该接口
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="2-崩溃监控与恢复机制"&gt;2. 崩溃监控与恢复机制
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;问题：&lt;/strong&gt; 应用偶发性崩溃，普通 UI 自动化检测不到&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;解决方案：&lt;/strong&gt; 设计三层检测机制&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;span class="lnt"&gt;7
+&lt;/span&gt;&lt;span class="lnt"&gt;8
+&lt;/span&gt;&lt;span class="lnt"&gt;9
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-typescript" data-lang="typescript"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;// 检测层级
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt; &lt;span class="err"&gt;进程检测：检查&lt;/span&gt; &lt;span class="nx"&gt;Chatbox&lt;/span&gt; &lt;span class="err"&gt;进程是否存在&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt; &lt;span class="err"&gt;窗口检测：检查应用窗口是否可访问&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt; &lt;span class="err"&gt;元素检测：检查关键元素是否响应&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;// 崩溃处理
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="err"&gt;自动保存崩溃上下文（截图、日志、最后操作）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="err"&gt;生成崩溃报告&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="err"&gt;尝试恢复或终止测试&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id="3-dmg-自动安装测试"&gt;3. DMG 自动安装测试
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;问题：&lt;/strong&gt; 每次发版需要手动测试安装流程，耗时长且容易出错&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;解决方案：&lt;/strong&gt; 实现自动化安装测试&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-python" data-lang="python"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;# 实现流程&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="mf"&gt;1.&lt;/span&gt; &lt;span class="n"&gt;自动下载最新版本&lt;/span&gt; &lt;span class="n"&gt;DMG&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="mf"&gt;2.&lt;/span&gt; &lt;span class="n"&gt;使用&lt;/span&gt; &lt;span class="n"&gt;AppleScript&lt;/span&gt; &lt;span class="n"&gt;模拟用户操作&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="mf"&gt;3.&lt;/span&gt; &lt;span class="n"&gt;自动完成安装流程&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="mf"&gt;4.&lt;/span&gt; &lt;span class="n"&gt;验证安装成功&lt;/span&gt;&lt;span class="err"&gt;（&lt;/span&gt;&lt;span class="n"&gt;版本号&lt;/span&gt;&lt;span class="err"&gt;、&lt;/span&gt;&lt;span class="n"&gt;启动&lt;/span&gt;&lt;span class="err"&gt;）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="mf"&gt;5.&lt;/span&gt; &lt;span class="n"&gt;卸载清理&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;效果：&lt;/strong&gt; 10 分钟手工测试 → 2 分钟自动化执行&lt;/p&gt;
+&lt;h3 id="4-多模型遍历测试"&gt;4. 多模型遍历测试
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;问题：&lt;/strong&gt; Chatbox 支持多个 AI 模型，需要逐一验证&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;解决方案：&lt;/strong&gt; 自动遍历所有模型进行功能验证&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;span class="lnt"&gt;5
+&lt;/span&gt;&lt;span class="lnt"&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-typescript" data-lang="typescript"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;// 核心逻辑
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt; &lt;span class="err"&gt;获取所有可用模型列表&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt; &lt;span class="err"&gt;依次切换模型&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt; &lt;span class="err"&gt;发送测试消息&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt; &lt;span class="err"&gt;验证响应正常&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt; &lt;span class="err"&gt;记录测试结果&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;hr&gt;
+&lt;h2 id="测试类型覆盖"&gt;测试类型覆盖
+&lt;/h2&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;测试类型&lt;/th&gt;
+&lt;th&gt;覆盖内容&lt;/th&gt;
+&lt;th&gt;工具/方式&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;冒烟测试&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;核心功能快速验证&lt;/td&gt;
+&lt;td&gt;自动化&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;功能测试&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;完整业务流程&lt;/td&gt;
+&lt;td&gt;手工 + 自动化&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;回归测试&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;历史功能稳定性&lt;/td&gt;
+&lt;td&gt;自动化&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;兼容性测试&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;跨平台、跨版本&lt;/td&gt;
+&lt;td&gt;手工&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;专项测试&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;搜索、导出、性能&lt;/td&gt;
+&lt;td&gt;专项验证&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;崩溃测试&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;长时间稳定性&lt;/td&gt;
+&lt;td&gt;自动化监控&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr&gt;
+&lt;h2 id="数据成果待补充"&gt;数据成果（待补充）
+&lt;/h2&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;指标&lt;/th&gt;
+&lt;th&gt;当前值&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;测试用例数&lt;/td&gt;
+&lt;td&gt;__ 条&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;自动化覆盖率&lt;/td&gt;
+&lt;td&gt;__ %&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;回归时间节省&lt;/td&gt;
+&lt;td&gt;从 X 小时 → X 分钟&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;累计发现 Bug&lt;/td&gt;
+&lt;td&gt;__ 个&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;代码行数&lt;/td&gt;
+&lt;td&gt;__ 行&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr&gt;
+&lt;h2 id="遇到的难点与解决"&gt;遇到的难点与解决
+&lt;/h2&gt;&lt;h3 id="难点-1元素定位不稳定"&gt;难点 1：元素定位不稳定
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;场景：&lt;/strong&gt; Electron 应用中，某些元素加载慢导致定位失败&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;解决：&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;使用智能等待策略：&lt;code&gt;waitForSelector&lt;/code&gt; + 自定义超时&lt;/li&gt;
+&lt;li&gt;实现重试机制：失败后自动重试 3 次&lt;/li&gt;
+&lt;li&gt;Fallback 方案：尝试多种定位方式&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="难点-2测试数据管理"&gt;难点 2：测试数据管理
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;场景：&lt;/strong&gt; 不同环境需要不同的测试数据&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;解决：&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;使用配置文件管理测试数据&lt;/li&gt;
+&lt;li&gt;环境变量切换环境&lt;/li&gt;
+&lt;li&gt;测试数据与代码分离&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="难点-3测试用例维护成本"&gt;难点 3：测试用例维护成本
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;场景：&lt;/strong&gt; UI 变化导致大量用例失效&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;解决：&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;采用 POM 设计模式，元素定位集中管理&lt;/li&gt;
+&lt;li&gt;使用稳定的定位方式（优先 data-testid）&lt;/li&gt;
+&lt;li&gt;定期维护和重构&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id="个人贡献"&gt;个人贡献
+&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;框架搭建&lt;/strong&gt;：从零设计并实现自动化测试框架&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;用例编写&lt;/strong&gt;：编写 XX 条自动化测试用例，覆盖核心功能&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;流程优化&lt;/strong&gt;：将手工回归时间从 X 天缩短到 X 小时&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;质量提升&lt;/strong&gt;：累计发现 __ 个 Bug，其中包括 __ 个严重 Bug&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;文档建设&lt;/strong&gt;：编写测试规范和最佳实践文档&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id="后续规划"&gt;后续规划
+&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;CI/CD 集成&lt;/strong&gt;：将自动化测试集成到 CI/CD 流程&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;测试报告优化&lt;/strong&gt;：生成详细的测试报告和趋势分析&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;性能测试&lt;/strong&gt;：加入启动速度、内存占用等性能指标监控&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;测试数据平台&lt;/strong&gt;：建立测试数据管理平台&lt;/li&gt;
+&lt;/ol&gt;</description></item><item><title>Chatbox 项目面试话术模板</title><link>https://andy115951.github.io/chatbox-%E9%A1%B9%E7%9B%AE%E9%9D%A2%E8%AF%95%E8%AF%9D%E6%9C%AF%E6%A8%A1%E6%9D%BF/</link><pubDate>Mon, 13 Jan 2025 00:00:00 +0800</pubDate><guid>https://andy115951.github.io/chatbox-%E9%A1%B9%E7%9B%AE%E9%9D%A2%E8%AF%95%E8%AF%9D%E6%9C%AF%E6%A8%A1%E6%9D%BF/</guid><description>&lt;h2 id="项目介绍模板"&gt;项目介绍模板
+&lt;/h2&gt;&lt;h3 id="1-一分钟项目介绍"&gt;1. 一分钟项目介绍
+&lt;/h3&gt;&lt;blockquote&gt;
+&lt;p&gt;面试官你好，我在 Chatbox AI 项目中负责自动化测试体系建设。Chatbox 是一款跨平台的智能对话助手，支持桌面端（Windows/macOS）和移动端（iOS/Android）。&lt;/p&gt;
+&lt;p&gt;我使用 &lt;strong&gt;Playwright + TypeScript&lt;/strong&gt; 从零搭建了一套自动化测试框架，采用 &lt;strong&gt;POM 设计模式&lt;/strong&gt; 实现了分层架构，覆盖了核心业务流程的自动化测试。同时针对偶发性崩溃问题，我设计了一套多层检测机制，能够自动监控崩溃并保存上下文信息。&lt;/p&gt;
+&lt;p&gt;目前自动化测试覆盖率达到了 __%，每次回归测试的时间从 __ 天缩短到 __ 小时，累计发现了 __ 个 Bug。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id="常见问题与回答"&gt;常见问题与回答
+&lt;/h2&gt;&lt;h3 id="q1-介绍一下你的测试框架"&gt;Q1: 介绍一下你的测试框架？
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;回答模板：&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;我采用的是 &lt;strong&gt;POM（Page Object Model）设计模式&lt;/strong&gt;，将测试代码分为四层：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;第一层是基础层（base.ts）&lt;/strong&gt;：负责应用的启动、关闭、崩溃检测等基础操作&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;第二层是操作层（actions）&lt;/strong&gt;：封装具体的业务操作，比如发送消息、切换模型、打开设置等&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;第三层是测试用例层&lt;/strong&gt;：调用操作层的方法，编写具体的测试场景&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;第四层是辅助层（helper）&lt;/strong&gt;：提供等待、截图、日志等通用工具&lt;/p&gt;
+&lt;p&gt;这样设计的好处是：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;代码复用性高&lt;/strong&gt;：通用操作只需写一次&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;维护成本低&lt;/strong&gt;：UI 变化只需修改对应的 Action 类&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;可读性好&lt;/strong&gt;：测试用例接近业务语言&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;追问：接口是怎么设计的？&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;我定义了一个 &lt;code&gt;IChatboxActions&lt;/code&gt; 接口，规定了核心操作方法。桌面端和移动端分别实现这个接口，这样测试用例就可以针对接口编程，实现了测试用例的跨平台统一。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h3 id="q2-你们是怎么做跨平台测试的"&gt;Q2: 你们是怎么做跨平台测试的？
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;回答模板：&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;我们采用 &lt;strong&gt;技术栈整合 + 接口抽象&lt;/strong&gt; 的方式：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;桌面端&lt;/strong&gt;：使用 Playwright 的 Electron 模式，可以直接连接 Chrome DevTools Protocol，性能和稳定性都很好&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;移动端&lt;/strong&gt;：使用 Appium 连接 Android 真机或模拟器&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;统一管理&lt;/strong&gt;：通过定义统一的接口 &lt;code&gt;IChatboxActions&lt;/code&gt;，让两端实现相同的操作方法。测试用例编写时就可以用相同的方式调用，底层自动切换到对应的平台实现。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;追问：移动端和桌面端的差异怎么处理？&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;差异主要在元素定位和交互方式上。我的做法是：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;定位策略不同&lt;/strong&gt;：移动端多用 accessibility id，桌面端用 selector&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;交互方式不同&lt;/strong&gt;：移动端有触摸手势，桌面端是鼠标操作&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;配置分离&lt;/strong&gt;：每个平台有独立的配置文件&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;这些差异都在 Action 层做了封装，测试用例层面是无感知的。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h3 id="q3-有没有遇到过难解决的问题"&gt;Q3: 有没有遇到过难解决的问题？
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;回答模板：&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;最有挑战的是 &lt;strong&gt;崩溃监控&lt;/strong&gt; 的实现。Chatbox 偶尔会崩溃，普通的 UI 自动化是检测不到的，因为元素定位会一直卡住。&lt;/p&gt;
+&lt;p&gt;我设计了一个 &lt;strong&gt;三层检测机制&lt;/strong&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;进程检测&lt;/strong&gt;：定期检查 Chatbox 进程是否存在&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;窗口检测&lt;/strong&gt;：检查应用窗口是否可访问&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;元素检测&lt;/strong&gt;：检查关键元素是否响应&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;任何一层检测失败，都会触发崩溃处理流程：保存上下文信息（截图、日志、最后操作）、生成崩溃报告、尝试恢复或终止测试。&lt;/p&gt;
+&lt;p&gt;这套机制上线后，我们成功捕获到了 __ 次崩溃，都提供了完整的复现信息给开发同学。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h3 id="q4-你的自动化测试覆盖了哪些场景"&gt;Q4: 你的自动化测试覆盖了哪些场景？
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;回答模板：&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;主要覆盖以下几个维度：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;功能维度&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;消息发送/接收&lt;/li&gt;
+&lt;li&gt;模型切换与验证&lt;/li&gt;
+&lt;li&gt;会话管理&lt;/li&gt;
+&lt;li&gt;设置修改&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;稳定性维度&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;长时间运行稳定性&lt;/li&gt;
+&lt;li&gt;崩溃监控&lt;/li&gt;
+&lt;li&gt;异常恢复&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;兼容性维度&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;不同操作系统版本&lt;/li&gt;
+&lt;li&gt;不同屏幕分辨率&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;专项测试&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;DMG 安装/卸载&lt;/li&gt;
+&lt;li&gt;文件导出功能&lt;/li&gt;
+&lt;li&gt;搜索功能&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;目前自动化覆盖率约 __%，核心业务流程基本全覆盖。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h3 id="q5-元素定位失败怎么办"&gt;Q5: 元素定位失败怎么办？
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;回答模板：&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;这是一个很常见的问题，我有一套完整的处理机制：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;事前预防&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;优先使用稳定的定位方式，比如 data-testid&lt;/li&gt;
+&lt;li&gt;避免使用容易变化的 class 或 xpath&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;事中处理&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;使用智能等待策略，设置合理的超时时间&lt;/li&gt;
+&lt;li&gt;实现重试机制，失败后自动重试 3 次&lt;/li&gt;
+&lt;li&gt;尝试多种定位方式的 Fallback&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;事后分析&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;失败时自动截图&lt;/li&gt;
+&lt;li&gt;记录详细的错误日志&lt;/li&gt;
+&lt;li&gt;生成测试报告便于分析&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h3 id="q6-测试数据怎么管理"&gt;Q6: 测试数据怎么管理？
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;回答模板：&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;我们采用的是 &lt;strong&gt;配置文件 + 环境变量&lt;/strong&gt; 的方式：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;配置文件&lt;/strong&gt;：不同环境的测试数据（如 API 地址、账号密码）存放在配置文件中，代码读取配置&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;环境变量&lt;/strong&gt;：通过环境变量切换不同的环境（dev/test/prod）&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;数据驱动&lt;/strong&gt;：对于参数化测试，使用数据文件（JSON/CSV）驱动，一套代码支持多组数据&lt;/p&gt;
+&lt;p&gt;这样做的好处是测试数据与代码分离，切换环境时不需要修改代码。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h3 id="q7-怎么处理不稳定的测试flaky-test"&gt;Q7: 怎么处理不稳定的测试（Flaky Test）？
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;回答模板：&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;不稳定测试主要有这几个原因：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;1. 网络问题&lt;/strong&gt;：增加超时时间，添加重试机制&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;2. 环境问题&lt;/strong&gt;：使用独立的测试环境，避免相互影响&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;3. 并发问题&lt;/strong&gt;：某些用例不能并发执行，单独标记出来串行运行&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;4. 时序问题&lt;/strong&gt;：添加显式等待，不要用硬编码的 sleep&lt;/p&gt;
+&lt;p&gt;我们还建立了 &lt;strong&gt;失败用例分析机制&lt;/strong&gt;：连续失败 3 次以上的用例会被标记为不稳定，需要重点分析优化。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h3 id="q8-cicd-怎么集成"&gt;Q8: CI/CD 怎么集成？
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;回答模板：&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;（如果你有经验就详细说，没有就说计划）&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;已实现/计划实现的方案&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;触发时机&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;每次 PR 提交时跑冒烟测试&lt;/li&gt;
+&lt;li&gt;每天定时跑全量回归&lt;/li&gt;
+&lt;li&gt;发版前跑完整测试套件&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;执行环境&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;使用 GitHub Actions 或 Jenkins&lt;/li&gt;
+&lt;li&gt;桌面端使用 macOS runner&lt;/li&gt;
+&lt;li&gt;移动端连接真机或模拟器&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;结果处理&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;生成测试报告（HTML/Allure）&lt;/li&gt;
+&lt;li&gt;失败时通知相关人员&lt;/li&gt;
+&lt;li&gt;测试结果留存历史趋势&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h3 id="q9-你觉得自动化测试的价值是什么"&gt;Q9: 你觉得自动化测试的价值是什么？
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;回答模板：&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;我认为主要有三个价值：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;1. 效率提升&lt;/strong&gt;：把重复性的手工测试自动化，让人有更多时间做探索性测试&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;2. 质量保障&lt;/strong&gt;：每次发版前快速回归，避免引入低级 Bug&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;3. 信心保障&lt;/strong&gt;：有自动化覆盖，开发改代码更有信心&lt;/p&gt;
+&lt;p&gt;但我也要说，自动化不是万能的。它更适合回归测试，新功能的探索性测试还是需要人工来做。我们的策略是：核心功能自动化，新功能手工测试，稳定后再自动化。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h3 id="q10-你的项目中最大的难点是什么你是怎么解决的"&gt;Q10: 你的项目中最大的难点是什么？你是怎么解决的？
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;回答模板（选择一个你最熟悉的）：&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;选项 1：崩溃监控&lt;/strong&gt;
+最大的难点是崩溃监控。应用偶发性崩溃，普通 UI 自动化检测不到。我设计了三层检测机制（进程/窗口/元素），实现了崩溃的自动捕获和上下文保存。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;选项 2：跨平台统一&lt;/strong&gt;
+最大的难点是跨平台统一。桌面端和移动端用不同的工具，如何避免写两套代码？我通过接口抽象，实现了测试用例的统一编写。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;选项 3：DMG 安装测试&lt;/strong&gt;
+最大的难点是 DMG 安装测试。macOS 的安装流程很复杂，需要模拟用户点击。我使用 AppleScript 实现了全自动化，把 10 分钟的手工测试变成了 2 分钟的自动化。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id="补充数据请填写"&gt;补充数据（请填写）
+&lt;/h2&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;项目&lt;/th&gt;
+&lt;th&gt;数据&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;测试用例数&lt;/td&gt;
+&lt;td&gt;__ 条&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;代码行数&lt;/td&gt;
+&lt;td&gt;__ 行&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;自动化覆盖率&lt;/td&gt;
+&lt;td&gt;__ %&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;回归时间节省&lt;/td&gt;
+&lt;td&gt;__ 天 → __ 小时&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;累计发现 Bug&lt;/td&gt;
+&lt;td&gt;__ 个&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;其中严重 Bug&lt;/td&gt;
+&lt;td&gt;__ 个&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;崩溃检测成功次数&lt;/td&gt;
+&lt;td&gt;__ 次&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr&gt;
+&lt;h2 id="面试准备清单"&gt;面试准备清单
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;input disabled="" type="checkbox"&gt; 熟悉项目整体架构&lt;/li&gt;
+&lt;li&gt;&lt;input disabled="" type="checkbox"&gt; 熟悉核心代码实现&lt;/li&gt;
+&lt;li&gt;&lt;input disabled="" type="checkbox"&gt; 准备好数据成果&lt;/li&gt;
+&lt;li&gt;&lt;input disabled="" type="checkbox"&gt; 准备好难点故事&lt;/li&gt;
+&lt;li&gt;&lt;input disabled="" type="checkbox"&gt; 准备好代码片段（可能让现场写）&lt;/li&gt;
+&lt;li&gt;&lt;input disabled="" type="checkbox"&gt; 准备好框架架构图（可以手绘）&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>
