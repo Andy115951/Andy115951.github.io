@@ -1,0 +1,453 @@
+<!doctype html><html lang=zh dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="前言 在使用 Playwright 进行 Electron 应用自动化测试时，我们经常会遇到需要获取元素选择器、调试测试代码的场景。本文总结了多种调试方法，帮助你高效开发 Electron 自动化测试。\n问题背景 核心需求 在开发 Electron 自动化测试时，我们需要：\n"><title>Playwright Electron 自动化测试调试指南</title><link rel=canonical href=https://andy115951.github.io/playwright-electron-%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95%E8%B0%83%E8%AF%95%E6%8C%87%E5%8D%97/><link rel=stylesheet href=/scss/style.min.51098b80cc297c94c0f57786d4a04e7372774e5993b60facf53870128a79bf73.css><meta property='og:title' content="Playwright Electron 自动化测试调试指南"><meta property='og:description' content="前言 在使用 Playwright 进行 Electron 应用自动化测试时，我们经常会遇到需要获取元素选择器、调试测试代码的场景。本文总结了多种调试方法，帮助你高效开发 Electron 自动化测试。\n问题背景 核心需求 在开发 Electron 自动化测试时，我们需要：\n"><meta property='og:url' content='https://andy115951.github.io/playwright-electron-%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95%E8%B0%83%E8%AF%95%E6%8C%87%E5%8D%97/'><meta property='og:site_name' content='Hugo 主题 Stack'><meta property='og:type' content='article'><meta property='article:section' content='Posts'><meta property='article:tag' content='Playwright'><meta property='article:tag' content='Electron'><meta property='article:tag' content='调试'><meta property='article:tag' content='codegen'><meta property='article:published_time' content='2026-01-29T17:30:00+08:00'><meta property='article:modified_time' content='2026-01-29T17:30:00+08:00'><meta name=twitter:title content="Playwright Electron 自动化测试调试指南"><meta name=twitter:description content="前言 在使用 Playwright 进行 Electron 应用自动化测试时，我们经常会遇到需要获取元素选择器、调试测试代码的场景。本文总结了多种调试方法，帮助你高效开发 Electron 自动化测试。\n问题背景 核心需求 在开发 Electron 自动化测试时，我们需要：\n"><link rel="shortcut icon" href=https://andy115951.github.io/img/favicon.png><style>body{background-image:url(/img/shu_bg1.jpg);background-size:cover;background-position:50%;background-attachment:fixed;background-repeat:no-repeat}body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,.75);z-index:-1;pointer-events:none}.sidebar-left .sidebar-sticky,.sidebar-left .logo-title,.sidebar-left .logo-subtitle,.sidebar-left a,.sidebar-left .menu-item{color:#2c3e50!important}.sidebar-left .menu-item:hover{color:#1a1a1a!important;background:rgba(0,0,0,5%)!important}.article-list,.article-container,.card,.widget{background:rgba(255,255,255,.85)!important;backdrop-filter:blur(5px)}[data-theme=dark] body::before{background:rgba(0,0,0,.65)}[data-theme=dark] .sidebar-left .sidebar-sticky,[data-theme=dark] .sidebar-left .logo-title,[data-theme=dark] .sidebar-left .logo-subtitle,[data-theme=dark] .sidebar-left a,[data-theme=dark] .sidebar-left .menu-item{color:#e0e0e0!important}[data-theme=dark] .article-list,[data-theme=dark] .article-container,[data-theme=dark] .card,[data-theme=dark] .widget{background:rgba(30,34,46,.9)!important}</style></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar.png width=150 height=150 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🚀</span></figure><div class=site-meta><h1 class=site-name><a href=/>Hugo 主题 Stack</a></h1><h2 class=site-description>为博客设计的卡片式 Hugo 主题</h2></div></header><ol class=menu-social><li><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li><li><a href=https://twitter.com target=_blank title=Twitter rel=me><svg class="icon icon-tabler icon-tabler-brand-twitter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M22 4.01c-1 .49-1.98.689-3 .99-1.121-1.265-2.783-1.335-4.38-.737S11.977 6.323 12 8v1c-3.245.083-6.135-1.395-8-4 0 0-4.182 7.433 4 11-1.872 1.247-3.739 2.088-6 2 3.308 1.803 6.913 2.423 10.034 1.517 3.58-1.04 6.522-3.723 7.651-7.742a13.84 13.84.0 00.497-3.753C20.18 7.773 21.692 5.25 22 4.009z"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>主页</span></a></li><li><a href=/%E5%85%B3%E4%BA%8E/><svg class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
+<span>关于</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li><a href=/%E9%93%BE%E6%8E%A5/><svg class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M10 14a3.5 3.5.0 005 0l4-4a3.5 3.5.0 00-5-5l-.5.5"/><path d="M14 10a3.5 3.5.0 00-5 0l-4 4a3.5 3.5.0 005 5l.5-.5"/></svg>
+<span>链接</span></a></li><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/archives><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/search><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=i18n-switch><svg class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 5h7"/><path d="M9 3v2c0 4.418-2.239 8-5 8"/><path d="M5 9c-.003 2.144 2.952 3.908 6.7 4"/><path d="M12 20l4-9 4 9"/><path d="M19.1 18h-6.2"/></svg>
+<select name=language title=language onchange="window.location.href=this.selectedOptions[0].value"><option value=/en/>English</option><option value=/playwright-electron-%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95%E8%B0%83%E8%AF%95%E6%8C%87%E5%8D%97/ selected>简体中文</option><option value=/zh-hant-tw/>正體中文</option><option value=/ja/>日本語</option></select></li><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav class=toc-nav id=TableOfContents><ol><li><a href=#前言>前言</a></li><li><a href=#问题背景>问题背景</a><ol><li><a href=#核心需求>核心需求</a></li><li><a href=#遇到的挑战>遇到的挑战</a></li></ol></li><li><a href=#解决方案对比>解决方案对比</a><ol><li><a href=#方案-1-使用-pwdebug-调试模式>方案 1: 使用 PWDEBUG 调试模式</a><ol><li><a href=#启动方式>启动方式</a></li><li><a href=#创建测试文件>创建测试文件</a></li><li><a href=#playwright-inspector-功能>Playwright Inspector 功能</a></li><li><a href=#优点>优点</a></li><li><a href=#缺点>缺点</a></li></ol></li><li><a href=#方案-2-使用网页版-codegen推荐>方案 2: 使用网页版 codegen（推荐）</a><ol><li><a href=#原理>原理</a></li><li><a href=#启动方式-1>启动方式</a></li><li><a href=#界面说明>界面说明</a></li><li><a href=#使用流程>使用流程</a></li><li><a href=#优点-1>优点</a></li><li><a href=#缺点-1>缺点</a></li></ol></li><li><a href=#方案-3-使用-chrome-devtools>方案 3: 使用 Chrome DevTools</a><ol><li><a href=#启动方式-2>启动方式</a></li><li><a href=#使用元素选择器>使用元素选择器</a></li><li><a href=#优点-2>优点</a></li><li><a href=#缺点-2>缺点</a></li></ol></li></ol></li><li><a href=#方案选择建议>方案选择建议</a><ol><li><a href=#场景对照表>场景对照表</a></li><li><a href=#推荐工作流>推荐工作流</a></li></ol></li><li><a href=#常见问题>常见问题</a><ol><li><a href=#q1-为什么不能直接用-codegen-录制-electron>Q1: 为什么不能直接用 codegen 录制 Electron？</a></li><li><a href=#q2-网页版和-electron-版的-dom-结构一样吗>Q2: 网页版和 Electron 版的 DOM 结构一样吗？</a></li><li><a href=#q3-pwdebug-的-pick-locator-为什么不稳定>Q3: PWDEBUG 的 Pick locator 为什么不稳定？</a></li><li><a href=#q4-如何确认移植的代码是否正确>Q4: 如何确认移植的代码是否正确？</a></li></ol></li><li><a href=#实战示例>实战示例</a><ol><li><a href=#示例-1-发送消息>示例 1: 发送消息</a></li><li><a href=#示例-2-切换模型>示例 2: 切换模型</a></li></ol></li><li><a href=#高级技巧>高级技巧</a><ol><li><a href=#技巧-1-使用测试装置fixtures>技巧 1: 使用测试装置（Fixtures）</a></li><li><a href=#技巧-2-等待元素加载>技巧 2: 等待元素加载</a></li><li><a href=#技巧-3-调试选择器>技巧 3: 调试选择器</a></li></ol></li><li><a href=#配置优化>配置优化</a><ol><li><a href=#排除不需要的测试>排除不需要的测试</a></li></ol></li><li><a href=#总结>总结</a><ol><li><a href=#关键要点>关键要点</a></li><li><a href=#快速参考>快速参考</a></li><li><a href=#代码移植模板>代码移植模板</a></li></ol></li><li><a href=#参考资料>参考资料</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/%E6%B5%8B%E8%AF%95/ style=background-color:#bee6ef;color:#0f353d>测试
+</a><a href=/categories/%E8%87%AA%E5%8A%A8%E5%8C%96/ style=background-color:#bec8ef;color:#0f183d>自动化</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/playwright-electron-%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95%E8%B0%83%E8%AF%95%E6%8C%87%E5%8D%97/>Playwright Electron 自动化测试调试指南</a></h2></div><footer class=article-time><div><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2026-01-29T17:30:00+08:00>2026年1月29日星期四</time></div><div><svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 7 分钟</time></div></footer></div></header><aside class=article-toc><details><summary><div class=article-toc-title><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6-6 6"/></svg>
+<span>目录</span></div></summary><nav class=toc-nav><ol><li><a href=#前言>前言</a></li><li><a href=#问题背景>问题背景</a><ol><li><a href=#核心需求>核心需求</a></li><li><a href=#遇到的挑战>遇到的挑战</a></li></ol></li><li><a href=#解决方案对比>解决方案对比</a><ol><li><a href=#方案-1-使用-pwdebug-调试模式>方案 1: 使用 PWDEBUG 调试模式</a><ol><li><a href=#启动方式>启动方式</a></li><li><a href=#创建测试文件>创建测试文件</a></li><li><a href=#playwright-inspector-功能>Playwright Inspector 功能</a></li><li><a href=#优点>优点</a></li><li><a href=#缺点>缺点</a></li></ol></li><li><a href=#方案-2-使用网页版-codegen推荐>方案 2: 使用网页版 codegen（推荐）</a><ol><li><a href=#原理>原理</a></li><li><a href=#启动方式-1>启动方式</a></li><li><a href=#界面说明>界面说明</a></li><li><a href=#使用流程>使用流程</a></li><li><a href=#优点-1>优点</a></li><li><a href=#缺点-1>缺点</a></li></ol></li><li><a href=#方案-3-使用-chrome-devtools>方案 3: 使用 Chrome DevTools</a><ol><li><a href=#启动方式-2>启动方式</a></li><li><a href=#使用元素选择器>使用元素选择器</a></li><li><a href=#优点-2>优点</a></li><li><a href=#缺点-2>缺点</a></li></ol></li></ol></li><li><a href=#方案选择建议>方案选择建议</a><ol><li><a href=#场景对照表>场景对照表</a></li><li><a href=#推荐工作流>推荐工作流</a></li></ol></li><li><a href=#常见问题>常见问题</a><ol><li><a href=#q1-为什么不能直接用-codegen-录制-electron>Q1: 为什么不能直接用 codegen 录制 Electron？</a></li><li><a href=#q2-网页版和-electron-版的-dom-结构一样吗>Q2: 网页版和 Electron 版的 DOM 结构一样吗？</a></li><li><a href=#q3-pwdebug-的-pick-locator-为什么不稳定>Q3: PWDEBUG 的 Pick locator 为什么不稳定？</a></li><li><a href=#q4-如何确认移植的代码是否正确>Q4: 如何确认移植的代码是否正确？</a></li></ol></li><li><a href=#实战示例>实战示例</a><ol><li><a href=#示例-1-发送消息>示例 1: 发送消息</a></li><li><a href=#示例-2-切换模型>示例 2: 切换模型</a></li></ol></li><li><a href=#高级技巧>高级技巧</a><ol><li><a href=#技巧-1-使用测试装置fixtures>技巧 1: 使用测试装置（Fixtures）</a></li><li><a href=#技巧-2-等待元素加载>技巧 2: 等待元素加载</a></li><li><a href=#技巧-3-调试选择器>技巧 3: 调试选择器</a></li></ol></li><li><a href=#配置优化>配置优化</a><ol><li><a href=#排除不需要的测试>排除不需要的测试</a></li></ol></li><li><a href=#总结>总结</a><ol><li><a href=#关键要点>关键要点</a></li><li><a href=#快速参考>快速参考</a></li><li><a href=#代码移植模板>代码移植模板</a></li></ol></li><li><a href=#参考资料>参考资料</a></li></ol></nav></details></aside><section class=article-content><h2 id=前言>前言</h2><p>在使用 Playwright 进行 Electron 应用自动化测试时，我们经常会遇到需要获取元素选择器、调试测试代码的场景。本文总结了多种调试方法，帮助你高效开发 Electron 自动化测试。</p><h2 id=问题背景>问题背景</h2><h3 id=核心需求>核心需求</h3><p>在开发 Electron 自动化测试时，我们需要：</p><ol><li><strong>获取元素选择器</strong> - 快速定位页面元素</li><li><strong>自动生成代码</strong> - 减少手动编写代码的工作量</li><li><strong>实时调试</strong> - 查看测试执行过程和结果</li></ol><h3 id=遇到的挑战>遇到的挑战</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># 尝试直接对 Electron 使用 codegen</span>
+</span></span><span class=line><span class=cl>npx playwright codegen /Applications/Chatbox.app/Contents/MacOS/Chatbox
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 错误：不支持 Electron 可执行文件</span>
+</span></span><span class=line><span class=cl>Error: Download is starting
+</span></span></code></pre></td></tr></table></div></div><p><strong>问题</strong>：Playwright 的 <code>codegen</code> 工具不支持直接录制 Electron 应用。</p><h2 id=解决方案对比>解决方案对比</h2><h3 id=方案-1-使用-pwdebug-调试模式>方案 1: 使用 PWDEBUG 调试模式</h3><h4 id=启动方式>启动方式</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># 启用 Playwright Inspector 调试模式</span>
+</span></span><span class=line><span class=cl><span class=nv>PWDEBUG</span><span class=o>=</span><span class=m>1</span> npx playwright <span class=nb>test</span> tests/record.spec.ts --project<span class=o>=</span>electron
+</span></span></code></pre></td></tr></table></div></div><h4 id=创建测试文件>创建测试文件</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=cl><span class=c1>// tests/record.spec.ts
+</span></span></span><span class=line><span class=cl><span class=kr>import</span> <span class=p>{</span> <span class=nx>test</span><span class=p>,</span> <span class=nx>_electron</span> <span class=kr>as</span> <span class=nx>electron</span> <span class=p>}</span> <span class=kr>from</span> <span class=s1>&#39;@playwright/test&#39;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nx>test</span><span class=p>(</span><span class=s1>&#39;录制模式 - 手动操作应用&#39;</span><span class=p>,</span> <span class=kr>async</span> <span class=p>()</span> <span class=o>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=c1>// 启动 Electron 应用
+</span></span></span><span class=line><span class=cl>  <span class=kr>const</span> <span class=nx>electronApp</span> <span class=o>=</span> <span class=k>await</span> <span class=nx>electron</span><span class=p>.</span><span class=nx>launch</span><span class=p>({</span>
+</span></span><span class=line><span class=cl>    <span class=nx>executablePath</span><span class=o>:</span> <span class=s1>&#39;/Applications/Chatbox.app/Contents/MacOS/Chatbox&#39;</span>
+</span></span><span class=line><span class=cl>  <span class=p>});</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=c1>// 获取主窗口
+</span></span></span><span class=line><span class=cl>  <span class=kr>const</span> <span class=nb>window</span> <span class=o>=</span> <span class=k>await</span> <span class=nx>electronApp</span><span class=p>.</span><span class=nx>firstWindow</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=s1>&#39;✅ Chatbox 应用已启动！&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=s1>&#39;📝 现在可以在 Inspector 中操作应用&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=c1>// 保持 Inspector 活跃状态
+</span></span></span><span class=line><span class=cl>  <span class=k>await</span> <span class=nb>window</span><span class=p>.</span><span class=nx>pause</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=k>await</span> <span class=nx>electronApp</span><span class=p>.</span><span class=nx>close</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=p>});</span>
+</span></span></code></pre></td></tr></table></div></div><h4 id=playwright-inspector-功能>Playwright Inspector 功能</h4><div class=table-wrapper><table><thead><tr><th>功能</th><th>说明</th></tr></thead><tbody><tr><td>🎯 Pick locator</td><td>点击后悬停元素可查看选择器</td></tr><tr><td>▶️ Resume</td><td>继续执行测试</td></tr><tr><td>⏸️ Pause</td><td>暂停测试</td></tr><tr><td>⏭️ Step over</td><td>单步执行</td></tr><tr><td>📋 Copy</td><td>复制生成的代码</td></tr></tbody></table></div><h4 id=优点>优点</h4><p>✅ 支持 Electron 应用<br>✅ 实时查看元素<br>✅ 调试现有测试<br>✅ 查看执行结果</p><h4 id=缺点>缺点</h4><p>❌ Pick locator 在 Electron 上不稳定<br>❌ 不能自动录制操作<br>❌ 需要手动复制代码</p><hr><h3 id=方案-2-使用网页版-codegen推荐>方案 2: 使用网页版 codegen（推荐）</h3><h4 id=原理>原理</h4><p>网页版 Chatbox 和 Electron 版的 DOM 结构基本一致，可以先在网页版录制，然后移植代码到 Electron。</p><h4 id=启动方式-1>启动方式</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># 录制网页版 Chatbox</span>
+</span></span><span class=line><span class=cl>npx playwright codegen https://web.chatboxai.app
+</span></span></code></pre></td></tr></table></div></div><h4 id=界面说明>界面说明</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>┌─────────────────────────────────────────────────────┐
+</span></span><span class=line><span class=cl>│  左侧：Chatbox 网页    │    右侧：代码生成器         │
+</span></span><span class=line><span class=cl>│                       │                             │
+</span></span><span class=line><span class=cl>│  [可操作的浏览器]      │    🎯 Pick locator         │
+</span></span><span class=line><span class=cl>│                       │    ⏺️ Record              │
+</span></span><span class=line><span class=cl>│                       │    📋 Copy                 │
+</span></span><span class=line><span class=cl>│                       │                             │
+</span></span><span class=line><span class=cl>│                       │  生成的代码：               │
+</span></span><span class=line><span class=cl>│                       │  await page.locator()      │
+</span></span><span class=line><span class=cl>└─────────────────────────────────────────────────────┘
+</span></span></code></pre></td></tr></table></div></div><h4 id=使用流程>使用流程</h4><ol><li><p><strong>启动 codegen</strong></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>npx playwright codegen https://web.chatboxai.app
+</span></span></code></pre></td></tr></table></div></div></li><li><p><strong>录制操作</strong></p><ul><li>确保 Record 按钮激活（红色）</li><li>在网页中操作：点击、输入等</li><li>右侧实时生成代码</li></ul></li><li><p><strong>获取元素选择器</strong></p><ul><li>点击 Pick locator（🎯 图标）</li><li>鼠标悬停在元素上</li><li>显示选择器代码</li></ul></li><li><p><strong>移植到 Electron</strong></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=cl><span class=c1>// 网页版生成的代码
+</span></span></span><span class=line><span class=cl><span class=k>await</span> <span class=nx>page</span><span class=p>.</span><span class=nx>locator</span><span class=p>(</span><span class=s1>&#39;#message-input&#39;</span><span class=p>).</span><span class=nx>fill</span><span class=p>(</span><span class=s1>&#39;你好&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=k>await</span> <span class=nx>page</span><span class=p>.</span><span class=nx>getByRole</span><span class=p>(</span><span class=s1>&#39;button&#39;</span><span class=p>,</span> <span class=p>{</span> <span class=nx>name</span><span class=o>:</span> <span class=sr>/send/i</span> <span class=p>}).</span><span class=nx>click</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 修改为 Electron 版（只需把 page 改成 window）
+</span></span></span><span class=line><span class=cl><span class=k>await</span> <span class=nb>window</span><span class=p>.</span><span class=nx>locator</span><span class=p>(</span><span class=s1>&#39;#message-input&#39;</span><span class=p>).</span><span class=nx>fill</span><span class=p>(</span><span class=s1>&#39;你好&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=k>await</span> <span class=nb>window</span><span class=p>.</span><span class=nx>getByRole</span><span class=p>(</span><span class=s1>&#39;button&#39;</span><span class=p>,</span> <span class=p>{</span> <span class=nx>name</span><span class=o>:</span> <span class=sr>/send/i</span> <span class=p>}).</span><span class=nx>click</span><span class=p>();</span>
+</span></span></code></pre></td></tr></table></div></div></li></ol><h4 id=优点-1>优点</h4><p>✅ 完美的元素拾取功能<br>✅ 自动生成代码<br>✅ 实时预览<br>✅ 操作简单直观</p><h4 id=缺点-1>缺点</h4><p>⚠️ 需要确认 DOM 结构是否一致<br>⚠️ 需要手动移植代码</p><hr><h3 id=方案-3-使用-chrome-devtools>方案 3: 使用 Chrome DevTools</h3><h4 id=启动方式-2>启动方式</h4><p><strong>步骤 1</strong>: 启动 Electron 应用并开启调试</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># 方式 A: 使用测试脚本</span>
+</span></span><span class=line><span class=cl><span class=nv>PWDEBUG</span><span class=o>=</span><span class=m>1</span> npx playwright <span class=nb>test</span> tests/record.spec.ts --project<span class=o>=</span>electron
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 方式 B: 直接启动应用</span>
+</span></span><span class=line><span class=cl>/Applications/Chatbox.app/Contents/MacOS/Chatbox --inspect-port<span class=o>=</span><span class=m>9222</span>
+</span></span></code></pre></td></tr></table></div></div><p><strong>步骤 2</strong>: 连接 Chrome DevTools</p><ol><li>打开 Chrome 浏览器</li><li>访问 <code>chrome://inspect</code></li><li>点击 &ldquo;Configure&rdquo;</li><li>添加 <code>localhost:9222</code></li><li>找到 Chatbox 并点击 &ldquo;inspect&rdquo;</li></ol><h4 id=使用元素选择器>使用元素选择器</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>Chrome DevTools 界面：
+</span></span><span class=line><span class=cl>┌──────────────────────────────────────────┐
+</span></span><span class=line><span class=cl>│  📍 (左上角箭头图标)                      │
+</span></span><span class=line><span class=cl>│     点击后选择页面元素                    │
+</span></span><span class=line><span class=cl>│                                          │
+</span></span><span class=line><span class=cl>│  Elements Panel:                         │
+</span></span><span class=line><span class=cl>│  &lt;button id=&#34;send-btn&#34;&gt;                  │
+</span></span><span class=line><span class=cl>│    &lt;svg class=&#34;icon&#34;&gt;...&lt;/svg&gt;           │
+</span></span><span class=line><span class=cl>│  &lt;/button&gt;                               │
+</span></span><span class=line><span class=cl>│                                          │
+</span></span><span class=line><span class=cl>│  选择器: #send-btn                       │
+</span></span><span class=line><span class=cl>└──────────────────────────────────────────┘
+</span></span></code></pre></td></tr></table></div></div><h4 id=优点-2>优点</h4><p>✅ 原生调试工具<br>✅ 功能最强大<br>✅ 可查看所有元素属性<br>✅ 最稳定可靠</p><h4 id=缺点-2>缺点</h4><p>❌ 需要手动复制选择器<br>❌ 不能自动生成代码</p><hr><h2 id=方案选择建议>方案选择建议</h2><h3 id=场景对照表>场景对照表</h3><div class=table-wrapper><table><thead><tr><th>场景</th><th>推荐方案</th><th>原因</th></tr></thead><tbody><tr><td>快速获取元素选择器</td><td>网页版 codegen</td><td>自动生成，效率高</td></tr><tr><td>调试现有测试</td><td>PWDEBUG 模式</td><td>支持断点调试</td></tr><tr><td>深入分析 DOM</td><td>Chrome DevTools</td><td>功能最全</td></tr><tr><td>学习测试代码</td><td>网页版 codegen</td><td>可视化学习</td></tr><tr><td>复杂问题排查</td><td>Chrome DevTools</td><td>原生工具最可靠</td></tr></tbody></table></div><h3 id=推荐工作流>推荐工作流</h3><pre class=mermaid>
+  graph TD
+    A[开始编写测试] --&gt; B{需要获取元素?}
+    B --&gt;|是| C[使用 codegen 录制网页版]
+    B --&gt;|否| D[直接编写代码]
+    
+    C --&gt; E[复制生成的代码]
+    E --&gt; F[将 page 改成 window]
+    F --&gt; G[粘贴到 Electron 测试]
+    
+    D --&gt; H[运行测试]
+    G --&gt; H
+    
+    H --&gt; I{测试通过?}
+    I --&gt;|否| J[PWDEBUG 模式调试]
+    I --&gt;|是| K[完成]
+    
+    J --&gt; L[使用 Chrome DevTools 深入分析]
+    L --&gt; H
+</pre><hr><h2 id=常见问题>常见问题</h2><h3 id=q1-为什么不能直接用-codegen-录制-electron>Q1: 为什么不能直接用 codegen 录制 Electron？</h3><p><strong>A</strong>: Playwright 的 codegen 工具设计用于录制 Web 浏览器，不支持 Electron 可执行文件。Electron 虽然使用 Chromium，但有自己的进程模型。</p><h3 id=q2-网页版和-electron-版的-dom-结构一样吗>Q2: 网页版和 Electron 版的 DOM 结构一样吗？</h3><p><strong>A</strong>: 99% 的情况下是一样的。Chatbox 的网页版和 Electron 版使用相同的渲染代码，只是打包方式不同。</p><h3 id=q3-pwdebug-的-pick-locator-为什么不稳定>Q3: PWDEBUG 的 Pick locator 为什么不稳定？</h3><p><strong>A</strong>: Electron 的窗口管理和事件处理与普通浏览器不同，导致 Pick locator 功能在 Electron 上有时无法正常工作。</p><h3 id=q4-如何确认移植的代码是否正确>Q4: 如何确认移植的代码是否正确？</h3><p><strong>A</strong>: 使用 PWDEBUG 模式运行测试，在 Inspector 中查看元素是否正确定位。</p><hr><h2 id=实战示例>实战示例</h2><h3 id=示例-1-发送消息>示例 1: 发送消息</h3><p><strong>使用 codegen 录制</strong>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>npx playwright codegen https://web.chatboxai.app
+</span></span></code></pre></td></tr></table></div></div><p><strong>操作步骤</strong>：</p><ol><li>点击"新对话"按钮</li><li>在输入框输入"你好"</li><li>点击发送按钮</li></ol><p><strong>生成的代码（网页版）</strong>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=cl><span class=k>await</span> <span class=nx>page</span><span class=p>.</span><span class=nx>getByRole</span><span class=p>(</span><span class=s1>&#39;button&#39;</span><span class=p>,</span> <span class=p>{</span> <span class=nx>name</span><span class=o>:</span> <span class=s1>&#39;新对话&#39;</span> <span class=p>}).</span><span class=nx>click</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=k>await</span> <span class=nx>page</span><span class=p>.</span><span class=nx>locator</span><span class=p>(</span><span class=s1>&#39;#message-input&#39;</span><span class=p>).</span><span class=nx>fill</span><span class=p>(</span><span class=s1>&#39;你好&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=k>await</span> <span class=nx>page</span><span class=p>.</span><span class=nx>getByRole</span><span class=p>(</span><span class=s1>&#39;button&#39;</span><span class=p>,</span> <span class=p>{</span> <span class=nx>name</span><span class=o>:</span> <span class=sr>/send/i</span> <span class=p>}).</span><span class=nx>click</span><span class=p>();</span>
+</span></span></code></pre></td></tr></table></div></div><p><strong>移植到 Electron</strong>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=cl><span class=nx>test</span><span class=p>(</span><span class=s1>&#39;发送消息&#39;</span><span class=p>,</span> <span class=kr>async</span> <span class=p>()</span> <span class=o>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=kr>const</span> <span class=nx>electronApp</span> <span class=o>=</span> <span class=k>await</span> <span class=nx>electron</span><span class=p>.</span><span class=nx>launch</span><span class=p>({</span>
+</span></span><span class=line><span class=cl>    <span class=nx>executablePath</span><span class=o>:</span> <span class=s1>&#39;/Applications/Chatbox.app/Contents/MacOS/Chatbox&#39;</span>
+</span></span><span class=line><span class=cl>  <span class=p>});</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=kr>const</span> <span class=nb>window</span> <span class=o>=</span> <span class=k>await</span> <span class=nx>electronApp</span><span class=p>.</span><span class=nx>firstWindow</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=c1>// 只需把 page 改成 window
+</span></span></span><span class=line><span class=cl>  <span class=k>await</span> <span class=nb>window</span><span class=p>.</span><span class=nx>getByRole</span><span class=p>(</span><span class=s1>&#39;button&#39;</span><span class=p>,</span> <span class=p>{</span> <span class=nx>name</span><span class=o>:</span> <span class=s1>&#39;新对话&#39;</span> <span class=p>}).</span><span class=nx>click</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>  <span class=k>await</span> <span class=nb>window</span><span class=p>.</span><span class=nx>locator</span><span class=p>(</span><span class=s1>&#39;#message-input&#39;</span><span class=p>).</span><span class=nx>fill</span><span class=p>(</span><span class=s1>&#39;你好&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>await</span> <span class=nb>window</span><span class=p>.</span><span class=nx>getByRole</span><span class=p>(</span><span class=s1>&#39;button&#39;</span><span class=p>,</span> <span class=p>{</span> <span class=nx>name</span><span class=o>:</span> <span class=sr>/send/i</span> <span class=p>}).</span><span class=nx>click</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=k>await</span> <span class=nx>electronApp</span><span class=p>.</span><span class=nx>close</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=p>});</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=示例-2-切换模型>示例 2: 切换模型</h3><p><strong>使用 codegen 录制</strong>：</p><ol><li>点击模型选择器</li><li>选择第一个模型</li></ol><p><strong>生成的代码</strong>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=cl><span class=c1>// 网页版
+</span></span></span><span class=line><span class=cl><span class=k>await</span> <span class=nx>page</span><span class=p>.</span><span class=nx>locator</span><span class=p>(</span><span class=s1>&#39;.model-selector&#39;</span><span class=p>).</span><span class=nx>click</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=k>await</span> <span class=nx>page</span><span class=p>.</span><span class=nx>locator</span><span class=p>(</span><span class=s1>&#39;.model-item&#39;</span><span class=p>).</span><span class=nx>first</span><span class=p>().</span><span class=nx>click</span><span class=p>();</span>
+</span></span></code></pre></td></tr></table></div></div><p><strong>移植到 Electron</strong>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=cl><span class=c1>// Electron 版
+</span></span></span><span class=line><span class=cl><span class=k>await</span> <span class=nb>window</span><span class=p>.</span><span class=nx>locator</span><span class=p>(</span><span class=s1>&#39;.model-selector&#39;</span><span class=p>).</span><span class=nx>click</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=k>await</span> <span class=nb>window</span><span class=p>.</span><span class=nx>locator</span><span class=p>(</span><span class=s1>&#39;.model-item&#39;</span><span class=p>).</span><span class=nx>first</span><span class=p>().</span><span class=nx>click</span><span class=p>();</span>
+</span></span></code></pre></td></tr></table></div></div><hr><h2 id=高级技巧>高级技巧</h2><h3 id=技巧-1-使用测试装置fixtures>技巧 1: 使用测试装置（Fixtures）</h3><p>创建可复用的测试装置：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=cl><span class=c1>// tests/fixtures/chatbox.ts
+</span></span></span><span class=line><span class=cl><span class=kr>import</span> <span class=p>{</span> <span class=nx>test</span> <span class=kr>as</span> <span class=nx>base</span><span class=p>,</span> <span class=nx>_electron</span> <span class=kr>as</span> <span class=nx>electron</span> <span class=p>}</span> <span class=kr>from</span> <span class=s1>&#39;@playwright/test&#39;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kr>type</span> <span class=nx>ChatboxFixtures</span> <span class=o>=</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nx>electronApp</span>: <span class=kt>any</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=nb>window</span><span class=o>:</span> <span class=kt>any</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kr>export</span> <span class=kr>const</span> <span class=nx>test</span> <span class=o>=</span> <span class=nx>base</span><span class=p>.</span><span class=nx>extend</span><span class=p>&lt;</span><span class=nt>ChatboxFixtures</span><span class=p>&gt;({</span>
+</span></span><span class=line><span class=cl>  <span class=nx>electronApp</span>: <span class=kt>async</span> <span class=p>({},</span> <span class=nx>use</span><span class=p>)</span> <span class=o>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kr>const</span> <span class=nx>app</span> <span class=o>=</span> <span class=k>await</span> <span class=nx>electron</span><span class=p>.</span><span class=nx>launch</span><span class=p>({</span>
+</span></span><span class=line><span class=cl>      <span class=nx>executablePath</span><span class=o>:</span> <span class=s1>&#39;/Applications/Chatbox.app/Contents/MacOS/Chatbox&#39;</span>
+</span></span><span class=line><span class=cl>    <span class=p>});</span>
+</span></span><span class=line><span class=cl>    <span class=k>await</span> <span class=nx>use</span><span class=p>(</span><span class=nx>app</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>await</span> <span class=nx>app</span><span class=p>.</span><span class=nx>close</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>  <span class=p>},</span>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>  <span class=nb>window</span><span class=o>:</span> <span class=kr>async</span> <span class=p>({</span> <span class=nx>electronApp</span> <span class=p>},</span> <span class=nx>use</span><span class=p>)</span> <span class=o>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kr>const</span> <span class=nx>win</span> <span class=o>=</span> <span class=k>await</span> <span class=nx>electronApp</span><span class=p>.</span><span class=nx>firstWindow</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=k>await</span> <span class=nx>use</span><span class=p>(</span><span class=nx>win</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>});</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kr>export</span> <span class=p>{</span> <span class=nx>expect</span> <span class=p>}</span> <span class=kr>from</span> <span class=s1>&#39;@playwright/test&#39;</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><p><strong>使用装置</strong>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=cl><span class=kr>import</span> <span class=p>{</span> <span class=nx>test</span><span class=p>,</span> <span class=nx>expect</span> <span class=p>}</span> <span class=kr>from</span> <span class=s1>&#39;./fixtures/chatbox&#39;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nx>test</span><span class=p>(</span><span class=s1>&#39;发送消息&#39;</span><span class=p>,</span> <span class=kr>async</span> <span class=p>({</span> <span class=nb>window</span> <span class=p>})</span> <span class=o>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=k>await</span> <span class=nb>window</span><span class=p>.</span><span class=nx>locator</span><span class=p>(</span><span class=s1>&#39;#message-input&#39;</span><span class=p>).</span><span class=nx>fill</span><span class=p>(</span><span class=s1>&#39;你好&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  <span class=k>await</span> <span class=nb>window</span><span class=p>.</span><span class=nx>getByRole</span><span class=p>(</span><span class=s1>&#39;button&#39;</span><span class=p>,</span> <span class=p>{</span> <span class=nx>name</span><span class=o>:</span> <span class=sr>/send/i</span> <span class=p>}).</span><span class=nx>click</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=p>});</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=技巧-2-等待元素加载>技巧 2: 等待元素加载</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=cl><span class=c1>// 等待特定元素出现
+</span></span></span><span class=line><span class=cl><span class=k>await</span> <span class=nb>window</span><span class=p>.</span><span class=nx>waitForSelector</span><span class=p>(</span><span class=s1>&#39;#message-input&#39;</span><span class=p>,</span> <span class=p>{</span> <span class=nx>state</span><span class=o>:</span> <span class=s1>&#39;visible&#39;</span> <span class=p>});</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 等待网络请求完成
+</span></span></span><span class=line><span class=cl><span class=k>await</span> <span class=nb>window</span><span class=p>.</span><span class=nx>waitForLoadState</span><span class=p>(</span><span class=s1>&#39;networkidle&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 等待元素可点击
+</span></span></span><span class=line><span class=cl><span class=k>await</span> <span class=nx>expect</span><span class=p>(</span><span class=nb>window</span><span class=p>.</span><span class=nx>locator</span><span class=p>(</span><span class=s1>&#39;#send-btn&#39;</span><span class=p>)).</span><span class=nx>toBeEnabled</span><span class=p>();</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=技巧-3-调试选择器>技巧 3: 调试选择器</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=cl><span class=c1>// 在 PWDEBUG 模式下测试选择器
+</span></span></span><span class=line><span class=cl><span class=k>await</span> <span class=nb>window</span><span class=p>.</span><span class=nx>pause</span><span class=p>();</span> <span class=c1>// 暂停，打开 Inspector
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 在 Inspector Console 中测试
+</span></span></span><span class=line><span class=cl><span class=c1>// await window.locator(&#39;#message-input&#39;).isVisible()
+</span></span></span></code></pre></td></tr></table></div></div><hr><h2 id=配置优化>配置优化</h2><h3 id=排除不需要的测试>排除不需要的测试</h3><p>修改 <code>playwright.config.ts</code>，让不同项目只运行相关测试：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=cl><span class=kr>import</span> <span class=p>{</span> <span class=nx>defineConfig</span><span class=p>,</span> <span class=nx>devices</span> <span class=p>}</span> <span class=kr>from</span> <span class=s1>&#39;@playwright/test&#39;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kr>export</span> <span class=k>default</span> <span class=nx>defineConfig</span><span class=p>({</span>
+</span></span><span class=line><span class=cl>  <span class=nx>testDir</span><span class=o>:</span> <span class=s1>&#39;./tests&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=nx>testMatch</span><span class=o>:</span> <span class=s1>&#39;**/{tests,framework}/**/*.spec.{js,ts}&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>  <span class=nx>projects</span><span class=o>:</span> <span class=p>[</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=nx>name</span><span class=o>:</span> <span class=s1>&#39;electron&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>      <span class=nx>use</span><span class=o>:</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=c1>// Electron 配置
+</span></span></span><span class=line><span class=cl>      <span class=p>},</span>
+</span></span><span class=line><span class=cl>      <span class=c1>// 排除 mobile 测试
+</span></span></span><span class=line><span class=cl>      <span class=nx>testIgnore</span><span class=o>:</span> <span class=s1>&#39;**/mobile/**/*.spec.ts&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=p>},</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=nx>name</span><span class=o>:</span> <span class=s1>&#39;chromium&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>      <span class=nx>use</span>: <span class=kt>devices</span><span class=p>[</span><span class=s1>&#39;Desktop Chrome&#39;</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>      <span class=nx>testIgnore</span><span class=o>:</span> <span class=s1>&#39;**/mobile/**/*.spec.ts&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=p>},</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=nx>name</span><span class=o>:</span> <span class=s1>&#39;mobile-android&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>      <span class=nx>use</span><span class=o>:</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=c1>// Android 配置
+</span></span></span><span class=line><span class=cl>      <span class=p>},</span>
+</span></span><span class=line><span class=cl>      <span class=c1>// 只运行 mobile 测试
+</span></span></span><span class=line><span class=cl>      <span class=nx>testMatch</span><span class=o>:</span> <span class=s1>&#39;**/mobile/**/*.spec.ts&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=p>},</span>
+</span></span><span class=line><span class=cl>  <span class=p>],</span>
+</span></span><span class=line><span class=cl><span class=p>});</span>
+</span></span></code></pre></td></tr></table></div></div><hr><h2 id=总结>总结</h2><h3 id=关键要点>关键要点</h3><ol><li><p><strong>网页版 codegen 是最佳选择</strong></p><ul><li>自动生成代码</li><li>元素拾取功能完善</li><li>99% 代码可直接移植</li></ul></li><li><p><strong>PWDEBUG 用于调试</strong></p><ul><li>不是录制工具</li><li>用于断点调试和查看结果</li></ul></li><li><p><strong>Chrome DevTools 用于深入分析</strong></p><ul><li>最强大的调试工具</li><li>适合复杂问题排查</li></ul></li></ol><h3 id=快速参考>快速参考</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># 录制操作（推荐）</span>
+</span></span><span class=line><span class=cl>npx playwright codegen https://web.chatboxai.app
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 调试测试</span>
+</span></span><span class=line><span class=cl><span class=nv>PWDEBUG</span><span class=o>=</span><span class=m>1</span> npx playwright <span class=nb>test</span> tests/your-test.spec.ts --project<span class=o>=</span>electron
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 运行特定测试</span>
+</span></span><span class=line><span class=cl>npx playwright <span class=nb>test</span> tests/your-test.spec.ts --project<span class=o>=</span>electron
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># UI 模式运行</span>
+</span></span><span class=line><span class=cl>npx playwright <span class=nb>test</span> tests/your-test.spec.ts --project<span class=o>=</span>electron --ui
+</span></span></code></pre></td></tr></table></div></div><h3 id=代码移植模板>代码移植模板</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-typescript data-lang=typescript><span class=line><span class=cl><span class=c1>// 网页版 → Electron 版
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 1. 导入
+</span></span></span><span class=line><span class=cl><span class=o>-</span> <span class=kr>import</span> <span class=p>{</span> <span class=nx>test</span> <span class=p>}</span> <span class=kr>from</span> <span class=s1>&#39;@playwright/test&#39;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=o>+</span> <span class=kr>import</span> <span class=p>{</span> <span class=nx>test</span><span class=p>,</span> <span class=nx>_electron</span> <span class=kr>as</span> <span class=nx>electron</span> <span class=p>}</span> <span class=kr>from</span> <span class=s1>&#39;@playwright/test&#39;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 2. 启动应用
+</span></span></span><span class=line><span class=cl><span class=o>+</span> <span class=kr>const</span> <span class=nx>electronApp</span> <span class=o>=</span> <span class=k>await</span> <span class=nx>electron</span><span class=p>.</span><span class=nx>launch</span><span class=p>({</span>
+</span></span><span class=line><span class=cl><span class=o>+</span>   <span class=nx>executablePath</span><span class=o>:</span> <span class=s1>&#39;/Applications/Chatbox.app/Contents/MacOS/Chatbox&#39;</span>
+</span></span><span class=line><span class=cl><span class=o>+</span> <span class=p>});</span>
+</span></span><span class=line><span class=cl><span class=o>+</span> <span class=kr>const</span> <span class=nb>window</span> <span class=o>=</span> <span class=k>await</span> <span class=nx>electronApp</span><span class=p>.</span><span class=nx>firstWindow</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 3. 所有 page 改成 window
+</span></span></span><span class=line><span class=cl><span class=o>-</span> <span class=k>await</span> <span class=nx>page</span><span class=p>.</span><span class=nx>locator</span><span class=p>(</span><span class=s1>&#39;#input&#39;</span><span class=p>).</span><span class=nx>fill</span><span class=p>(</span><span class=s1>&#39;text&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=o>+</span> <span class=k>await</span> <span class=nb>window</span><span class=p>.</span><span class=nx>locator</span><span class=p>(</span><span class=s1>&#39;#input&#39;</span><span class=p>).</span><span class=nx>fill</span><span class=p>(</span><span class=s1>&#39;text&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 4. 关闭应用
+</span></span></span><span class=line><span class=cl><span class=o>+</span> <span class=k>await</span> <span class=nx>electronApp</span><span class=p>.</span><span class=nx>close</span><span class=p>();</span>
+</span></span></code></pre></td></tr></table></div></div><hr><h2 id=参考资料>参考资料</h2><ul><li><a class=link href=https://playwright.dev target=_blank rel=noopener>Playwright 官方文档</a></li><li><a class=link href=https://playwright.dev/docs/api/class-electron target=_blank rel=noopener>Playwright Electron 支持</a></li><li><a class=link href=https://chromedevtools.github.io/devtools-protocol/ target=_blank rel=noopener>Chrome DevTools 协议</a></li><li><a class=link href=https://github.com/Bin-Huang/chatbox target=_blank rel=noopener>Chatbox 项目仓库</a></li></ul></section><footer class=article-footer><section class=article-tags><a href=/tags/playwright/>Playwright</a>
+<a href=/tags/electron/>Electron</a>
+<a href=/tags/%E8%B0%83%E8%AF%95/>调试</a>
+<a href=/tags/codegen/>Codegen</a></section><section class=article-copyright><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><div class=disqus-container></div><style>.disqus-container{background-color:var(--card-background);border-radius:var(--card-border-radius);box-shadow:var(--shadow-l1);padding:var(--card-padding)}</style><script>window.addEventListener("onColorSchemeChange",e=>{typeof DISQUS=="object"&&DISQUS.reset({reload:!0})})</script><footer class=site-footer><section class=copyright>&copy;
+2024 -
+2026 Hugo 主题 Stack</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.0>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script><script type=module>
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.12.2/+esm';
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'neutral',
+    });
+</script></main></div><script type=text/javascript src=/ts/main.acaf849f2b273f6a8368a58b001f336738d0c948d92e79b116467d0c7515f932.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>
